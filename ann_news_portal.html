@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANN – Avyu News Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1a2744;
+    --navy-light: #243560;
+    --red: #c0392b;
+    --red-light: #e74c3c;
+    --gold: #c9a84c;
+    --ink: #1a1a1a;
+    --ink-mid: #333;
+    --ink-light: #555;
+    --paper: #f5f0e8;
+    --paper-dark: #ede8de;
+    --paper-mid: #e8e2d5;
+    --white: #ffffff;
+    --rule: #bbb5a8;
+    --rule-dark: #8a8070;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* ── PAPER TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── TOP TICKER ── */
+  .ticker-bar {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    height: 32px;
+  }
+  .ticker-label {
+    background: var(--red);
+    padding: 0 14px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .ticker-track {
+    display: flex;
+    animation: ticker 40s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker-track span { margin: 0 40px; opacity: 0.9; }
+  .ticker-track .dot { color: var(--gold); margin: 0 10px; }
+  @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--white);
+    border-bottom: 3px solid var(--navy);
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(26,39,68,0.12);
+  }
+
+  .header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .logo-icon {
+    width: 52px; height: 52px;
+  }
+  .logo-text-block { line-height: 1; }
+  .logo-ann {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 36px;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+    display: block;
+    line-height: 1;
+  }
+  .logo-full {
+    font-family: 'Source Serif 4', serif;
+    font-size: 10px;
+    color: var(--ink-light);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  nav { display: flex; align-items: center; gap: 2px; }
+  .nav-link {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--navy);
+    padding: 8px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: none; background: none;
+    transition: all 0.18s;
+    position: relative;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute; bottom: 4px; left: 14px; right: 14px;
+    height: 2px; background: var(--red);
+    transform: scaleX(0); transition: transform 0.18s;
+  }
+  .nav-link:hover { color: var(--red); }
+  .nav-link:hover::after, .nav-link.active::after { transform: scaleX(1); }
+  .nav-link.active { color: var(--red); }
+
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .btn-add-news {
+    background: var(--red);
+    color: white;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.18s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-add-news:hover { background: var(--red-light); }
+  .btn-auto {
+    background: var(--navy);
+    color: white;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.18s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-auto:hover { background: var(--navy-light); }
+  .btn-auto.running { background: #27ae60; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.75} }
+
+  /* ── DATE BAR ── */
+  .date-bar {
+    background: var(--paper-dark);
+    border-bottom: 1px solid var(--rule);
+    text-align: center;
+    padding: 6px 24px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--ink-light);
+    text-transform: uppercase;
+  }
+
+  /* ── MAIN WRAP ── */
+  main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+    position: relative; z-index: 1;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--white);
+    background: var(--navy);
+    display: inline-block;
+    padding: 5px 14px;
+    margin-bottom: 18px;
+  }
+  .section-title.red { background: var(--red); }
+
+  /* ── BREAKING NEWS HERO ── */
+  .breaking-hero {
+    background: var(--navy);
+    border-radius: 4px;
+    padding: 28px 36px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .breaking-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(192,57,43,0.3) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .breaking-badge {
+    background: var(--red);
+    color: white;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    flex-shrink: 0;
+    animation: flash 1.8s ease-in-out infinite;
+  }
+  @keyframes flash { 0%,100%{opacity:1} 50%{opacity:0.6} }
+  .breaking-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.25;
+    flex: 1;
+  }
+  .breaking-text em { color: var(--gold); font-style: normal; }
+  .breaking-meta {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 6px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── FEATURED STORY ── */
+  .featured-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 28px;
+    margin-bottom: 36px;
+  }
+  .featured-main {
+    background: var(--white);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .featured-main:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+  .featured-img {
+    width: 100%; height: 280px;
+    object-fit: cover;
+    display: block;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    position: relative;
+  }
+  .featured-img-placeholder {
+    width: 100%; height: 280px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px;
+  }
+  .featured-body { padding: 22px 24px; }
+  .featured-category {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 10px;
+  }
+  .featured-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .featured-excerpt {
+    font-size: 14px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .featured-foot {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    color: var(--rule-dark);
+    letter-spacing: 0.06em;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ── SIDEBAR LATEST ── */
+  .sidebar-latest { display: flex; flex-direction: column; gap: 14px; }
+  .sidebar-item {
+    background: var(--white);
+    border-radius: 4px;
+    padding: 14px 16px;
+    display: flex; gap: 12px;
+    cursor: pointer;
+    transition: box-shadow 0.18s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .sidebar-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .sidebar-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    color: var(--rule);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+  }
+  .sidebar-content {}
+  .sidebar-cat {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 4px;
+  }
+  .sidebar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .sidebar-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    color: var(--ink-light);
+    margin-top: 4px;
+  }
+
+  /* ── DIVIDER ── */
+  .ornamental-rule {
+    display: flex; align-items: center; gap: 12px;
+    margin: 32px 0;
+  }
+  .ornamental-rule::before, .ornamental-rule::after {
+    content: ''; flex: 1; height: 1px; background: var(--rule-dark);
+  }
+  .ornamental-rule span {
+    font-size: 18px; color: var(--rule-dark);
+  }
+
+  /* ── CATEGORY SECTIONS ── */
+  .category-section { margin-bottom: 44px; }
+  .cat-header {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 3px double var(--navy);
+    padding-bottom: 10px;
+  }
+  .cat-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 900;
+    font-style: italic;
+    color: var(--navy);
+    flex: 1;
+  }
+  .cat-count {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    color: var(--ink-light);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+  .post-card {
+    background: var(--white);
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s;
+    display: flex; flex-direction: column;
+  }
+  .post-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+  .post-card-img {
+    height: 120px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    background: linear-gradient(135deg, var(--paper-dark), var(--paper-mid));
+    flex-shrink: 0;
+  }
+  .post-card-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; }
+  .post-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--ink);
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .post-card-excerpt {
+    font-size: 11px;
+    color: var(--ink-light);
+    line-height: 1.5;
+    margin-top: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .post-card-foot {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    color: var(--rule-dark);
+    padding: 8px 14px;
+    border-top: 1px solid var(--rule);
+    letter-spacing: 0.04em;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .post-card-foot .read-link {
+    color: var(--red);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    grid-column: 1 / -1;
+    padding: 40px;
+    text-align: center;
+    background: var(--white);
+    border-radius: 3px;
+    border: 2px dashed var(--rule);
+    color: var(--ink-light);
+  }
+  .empty-state .empty-icon { font-size: 36px; margin-bottom: 10px; }
+  .empty-state p {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--rule-dark);
+  }
+
+  /* ── MODAL: ADD NEWS ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,39,68,0.7);
+    backdrop-filter: blur(3px);
+    z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 6px;
+    padding: 36px 40px;
+    width: 600px; max-width: 95vw;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    position: relative;
+  }
+  .modal h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--navy);
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--rule);
+  }
+  .form-row { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    margin-bottom: 6px;
+  }
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--rule);
+    border-radius: 3px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--paper);
+    transition: border-color 0.18s;
+    outline: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--navy);
+    background: var(--white);
+  }
+  .form-textarea { resize: vertical; min-height: 100px; }
+  .form-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-submit {
+    background: var(--navy);
+    color: white;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 12px 28px;
+    border-radius: 3px;
+    cursor: pointer;
+    flex: 1;
+    transition: background 0.18s;
+  }
+  .btn-submit:hover { background: var(--navy-light); }
+  .btn-cancel {
+    background: none;
+    color: var(--ink-mid);
+    border: 1.5px solid var(--rule);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color 0.18s;
+  }
+  .btn-cancel:hover { border-color: var(--ink-mid); }
+
+  /* ── ARTICLE MODAL ── */
+  .article-modal { max-width: 700px; }
+  .article-modal .art-category {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 12px;
+  }
+  .article-modal .art-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+  .article-modal .art-meta {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    color: var(--rule-dark);
+    letter-spacing: 0.08em;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--rule);
+  }
+  .article-modal .art-body {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--ink-mid);
+  }
+  .article-modal .art-body p { margin-bottom: 14px; }
+  .art-emoji { font-size: 80px; text-align: center; display: block; margin-bottom: 20px; }
+
+  /* ── AUTO-GENERATE LOG ── */
+  .gen-log {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 300px;
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    display: none;
+    z-index: 500;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .gen-log.show { display: block; }
+  .gen-log-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .gen-log-item { padding: 3px 0; opacity: 0.85; line-height: 1.4; }
+  .gen-log-item.new { color: #2ecc71; }
+
+  /* ── LOADING SPINNER ── */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── CLOSE BTN ── */
+  .modal-close {
+    position: absolute; top: 14px; right: 18px;
+    font-size: 22px; cursor: pointer;
+    color: var(--ink-light);
+    background: none; border: none;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--red); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy);
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    padding: 28px 24px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    position: relative; z-index: 1;
+  }
+  footer strong { color: var(--gold); }
+
+  /* ── PAGE VIEWS ── */
+  .page-view { display: none; }
+  .page-view.active { display: block; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #27ae60; color: white;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 13px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 12px 24px; border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    z-index: 2000; opacity: 0;
+    transition: opacity 0.3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  @media(max-width:900px){
+    .featured-grid { grid-template-columns: 1fr; }
+    .posts-grid { grid-template-columns: repeat(2,1fr); }
+    .header-inner { height: auto; padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+    nav { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <div class="ticker-label">⚡ Live</div>
+  <div style="flex:1;overflow:hidden;">
+    <div class="ticker-track" id="tickerTrack">
+      <span>Welcome to Avyu News Network — Your trusted source for local, cyber, and scam news</span>
+      <span class="dot">◆</span>
+      <span>Stay informed. Stay safe. Stay alert.</span>
+      <span class="dot">◆</span>
+      <span>Breaking coverage 24/7</span>
+      <span class="dot">◆</span>
+      <span>ANN: Avyu News Network — Hyderabad's premier digital newsroom</span>
+      <span class="dot">◆</span>
+      <!-- duplicate for seamless loop -->
+      <span>Welcome to Avyu News Network — Your trusted source for local, cyber, and scam news</span>
+      <span class="dot">◆</span>
+      <span>Stay informed. Stay safe. Stay alert.</span>
+      <span class="dot">◆</span>
+      <span>Breaking coverage 24/7</span>
+      <span class="dot">◆</span>
+      <span>ANN: Avyu News Network — Hyderabad's premier digital newsroom</span>
+      <span class="dot">◆</span>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-wrap" onclick="showPage('home')">
+      <!-- Inline SVG logo (matches ANN shield style) -->
+      <svg class="logo-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M26 2L4 11V27C4 39 14 48.5 26 51C38 48.5 48 39 48 27V11L26 2Z" fill="#1a2744"/>
+        <path d="M26 2L4 11V16L26 7L48 16V11L26 2Z" fill="#8fa0c0"/>
+        <path d="M32 10L26 2L20 10" fill="#c0392b"/>
+        <rect x="14" y="18" width="24" height="20" rx="1.5" fill="white"/>
+        <rect x="16" y="20" width="10" height="7" rx="0.5" fill="#1a2744" opacity="0.15"/>
+        <rect x="16" y="20" width="10" height="7" rx="0.5" fill="#1a2744" opacity="0.1"/>
+        <rect x="28" y="20" width="8" height="2" rx="0.5" fill="#1a2744" opacity="0.4"/>
+        <rect x="28" y="24" width="8" height="1.5" rx="0.5" fill="#1a2744" opacity="0.3"/>
+        <rect x="28" y="27.5" width="6" height="1.5" rx="0.5" fill="#1a2744" opacity="0.25"/>
+        <rect x="16" y="30" width="20" height="1.5" rx="0.5" fill="#1a2744" opacity="0.3"/>
+        <rect x="16" y="33" width="18" height="1.5" rx="0.5" fill="#1a2744" opacity="0.25"/>
+        <rect x="16" y="36" width="14" height="1.5" rx="0.5" fill="#1a2744" opacity="0.2"/>
+      </svg>
+      <div class="logo-text-block">
+        <span class="logo-ann">ANN</span>
+        <span class="logo-full">Avyu News Network</span>
+      </div>
+    </div>
+
+    <nav id="mainNav">
+      <button class="nav-link active" onclick="showPage('home')">Home</button>
+      <button class="nav-link" onclick="showPage('local')">Local News</button>
+      <button class="nav-link" onclick="showPage('cyber')">Cyber Crime</button>
+      <button class="nav-link" onclick="showPage('scam')">Scam Alerts</button>
+      <button class="nav-link" onclick="showPage('about')">About</button>
+      <button class="nav-link" onclick="showPage('contact')">Contact</button>
+	  <button onclick="login()">Admin</button>
+    </nav>
+
+    <div class="header-right">    
+	  <button class="btn-add-news" id="addNewsBtn" onclick="openAddModal()" style="display:none;">
+		+ Add News
+	  </button>
+
+	  <button class="btn-auto" id="logoutBtn" onclick="logout()" style="display:none;">
+		🚪 Logout
+	  </button>
+	</div>
+</header>
+
+<!-- DATE BAR -->
+<div class="date-bar" id="dateBar"></div>
+
+<!-- ═══════════════════════ HOME PAGE ═══════════════════════ -->
+<div class="page-view active" id="page-home">
+<main>
+
+  <!-- BREAKING NEWS -->
+  <div class="breaking-hero" id="breakingHero">
+    <div class="breaking-badge">⚡ Breaking</div>
+    <div>
+      <div class="breaking-text" id="breakingText">Loading latest news…</div>
+      <div class="breaking-meta" id="breakingMeta"></div>
+    </div>
+  </div>
+
+  <!-- FEATURED + SIDEBAR -->
+  <div class="section-title">Featured Story</div>
+  <div class="featured-grid">
+    <div class="featured-main" id="featuredStory" onclick="openArticle(0)">
+      <div class="featured-img-placeholder" id="featuredEmoji">📰</div>
+      <div class="featured-body">
+        <div class="featured-category" id="featuredCat">Loading…</div>
+        <div class="featured-title" id="featuredTitle">Awaiting first story…</div>
+        <div class="featured-excerpt" id="featuredExcerpt">Add your first news article or use Auto Daily News to generate AI-powered stories.</div>
+        <div class="featured-foot">
+          <span id="featuredTime"></span>
+          <span>ANN Staff</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">Latest Stories</div>
+      <div class="sidebar-latest" id="sidebarLatest"></div>
+    </div>
+  </div>
+
+  <div class="ornamental-rule"><span>⬥</span></div>
+
+  <!-- LOCAL NEWS -->
+  <div class="category-section">
+    <div class="cat-header">
+      <div class="cat-name">Local News</div>
+      <div class="cat-count" id="localCount">0 stories</div>
+    </div>
+    <div class="posts-grid" id="localGrid">
+      <div class="empty-state"><div class="empty-icon">🏙</div><p>No local stories yet — add some!</p></div>
+    </div>
+  </div>
+
+  <div class="ornamental-rule"><span>⬥</span></div>
+
+  <!-- CYBER CRIME -->
+  <div class="category-section">
+    <div class="cat-header">
+      <div class="cat-name">Cyber Crime</div>
+      <div class="cat-count" id="cyberCount">0 stories</div>
+    </div>
+    <div class="posts-grid" id="cyberGrid">
+      <div class="empty-state"><div class="empty-icon">💻</div><p>No cyber crime stories yet</p></div>
+    </div>
+  </div>
+
+  <div class="ornamental-rule"><span>⬥</span></div>
+
+  <!-- SCAM ALERTS -->
+  <div class="category-section">
+    <div class="cat-header">
+      <div class="cat-name">Scam Alerts</div>
+      <div class="cat-count" id="scamCount">0 stories</div>
+    </div>
+    <div class="posts-grid" id="scamGrid">
+      <div class="empty-state"><div class="empty-icon">⚠️</div><p>No scam alerts yet</p></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ═══════════════════════ CATEGORY PAGES ═══════════════════════ -->
+<div class="page-view" id="page-local">
+  <main>
+    <div class="section-title red">Local News</div>
+    <div class="posts-grid" id="localPageGrid" style="margin-top:8px"></div>
+  </main>
+</div>
+
+<div class="page-view" id="page-cyber">
+  <main>
+    <div class="section-title red">Cyber Crime</div>
+    <div class="posts-grid" id="cyberPageGrid" style="margin-top:8px"></div>
+  </main>
+</div>
+
+<div class="page-view" id="page-scam">
+  <main>
+    <div class="section-title red">Scam Alerts</div>
+    <div class="posts-grid" id="scamPageGrid" style="margin-top:8px"></div>
+  </main>
+</div>
+
+<!-- ═══════════════════════ ABOUT PAGE ═══════════════════════ -->
+<div class="page-view" id="page-about">
+  <main style="max-width:800px">
+    <div class="section-title">About ANN</div>
+    <div style="background:var(--white);padding:36px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-top:8px">
+      <div style="font-size:64px;text-align:center;margin-bottom:24px">🛡</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--navy);margin-bottom:16px;text-align:center">Avyu News Network</h2>
+      <p style="font-size:15px;line-height:1.8;color:var(--ink-mid);margin-bottom:14px">Avyu News Network (ANN) is a digital-first news platform dedicated to keeping communities informed about local happenings, rising cyber crimes, and scam threats that affect everyday people.</p>
+      <p style="font-size:15px;line-height:1.8;color:var(--ink-mid);margin-bottom:14px">Our mission is to provide timely, accurate, and relevant news coverage with a focus on public safety and awareness. We believe that an informed citizen is an empowered citizen.</p>
+      <p style="font-size:15px;line-height:1.8;color:var(--ink-mid)">Founded with the vision of bridging the gap between traditional journalism and the digital age, ANN leverages cutting-edge technology to deliver news as it happens.</p>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════ CONTACT PAGE ═══════════════════════ -->
+<div class="page-view" id="page-contact">
+  <main style="max-width:700px">
+    <div class="section-title">Contact ANN</div>
+    <div style="background:var(--white);padding:36px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-top:8px">
+      <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--navy);margin-bottom:20px">Get in Touch</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+        <div style="padding:20px;background:var(--paper);border-radius:4px;text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">📧</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-light);margin-bottom:4px">Email</div>
+          <div style="font-size:13px;color:var(--navy);font-weight:600">news@avyu.in</div>
+        </div>
+        <div style="padding:20px;background:var(--paper);border-radius:4px;text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">📍</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-light);margin-bottom:4px">Location</div>
+          <div style="font-size:13px;color:var(--navy);font-weight:600">Hyderabad, Telangana</div>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="form-label">Your Name</label>
+        <input class="form-input" placeholder="Enter your name">
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" placeholder="your@email.com">
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="form-label">Message</label>
+        <textarea class="form-textarea" placeholder="Tips, corrections, or story ideas…"></textarea>
+      </div>
+      <button class="btn-submit" onclick="showToast('Message sent! We\'ll get back to you soon.')">Send Message</button>
+    </div>
+  </main>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>ANN</strong> — Avyu News Network &nbsp;|&nbsp; © 2025 &nbsp;|&nbsp; All Rights Reserved &nbsp;|&nbsp; Hyderabad, Telangana
+</footer>
+
+<!-- ═══════════════════════ ADD NEWS MODAL ═══════════════════════ -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAddModal()">✕</button>
+    <h2>📰 Add News Article</h2>
+    <div class="form-row">
+      <label class="form-label">Category *</label>
+      <select class="form-select" id="newsCategory">
+        <option value="local">Local News</option>
+        <option value="cyber">Cyber Crime</option>
+        <option value="scam">Scam Alerts</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Headline *</label>
+      <input class="form-input" id="newsTitle" placeholder="Enter a compelling headline…">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Summary / Excerpt</label>
+      <input class="form-input" id="newsExcerpt" placeholder="One-line summary…">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Full Article Body</label>
+      <textarea class="form-textarea" id="newsBody" placeholder="Write the full article here…" style="min-height:140px"></textarea>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Emoji Icon (optional)</label>
+	  <input class="form-input" id="newsEmoji">
+    </div>
+	<div class="form-row">
+	  <label class="form-label">Image URL</label>
+	  <input class="form-input" id="newsImage" placeholder="Paste image URL (https://...)">
+	</div>
+    <div class="form-actions">
+      <button class="btn-submit" onclick="submitNews()">Publish Article</button>
+      <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ ARTICLE READ MODAL ═══════════════════════ -->
+<div class="modal-overlay" id="articleModal">
+  <div class="modal article-modal">
+    <button class="modal-close" onclick="document.getElementById('articleModal').classList.remove('open')">✕</button>
+    <span class="art-emoji" id="artEmoji"></span>
+    <div class="art-category" id="artCat"></div>
+    <div class="art-title" id="artTitle"></div>
+    <div class="art-meta" id="artMeta"></div>
+    <div class="art-body" id="artBody"></div>
+  </div>
+</div>
+
+<!-- AUTO-GENERATE LOG -->
+<div class="gen-log" id="genLog">
+  <div class="gen-log-title">⚙ Auto News Generator</div>
+  <div id="genLogItems"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBl0nqvRthaAyetMs2CTPQLRZokrlR8Bgo",
+  authDomain: "ann-news-6506a.firebaseapp.com",
+  projectId: "ann-news-6506a",
+  storageBucket: "ann-news-6506a.firebasestorage.app",
+  messagingSenderId: "1052410903126",
+  appId: "1:1052410903126:web:390d9b7d251fa65af4d9f7"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const auth = firebase.auth();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  DATA STORE
+// ═══════════════════════════════════════════════════════
+let newsDB = [];
+let autoInterval = null;
+
+const CAT_META = {
+  local: { label: 'Local News', emoji: '🏙', color: '#1a2744' },
+  cyber: { label: 'Cyber Crime', emoji: '💻', color: '#c0392b' },
+  scam:  { label: 'Scam Alerts', emoji: '⚠️', color: '#c9a84c' },
+};
+
+function saveDB() { localStorage.setItem('annNewsDB', JSON.stringify(newsDB)); }
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff/60000);
+  if (m < 1) return 'Just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m/60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h/24);
+  return `${d}d ago`;
+}
+
+function formatDate(ts) {
+  return new Date(ts).toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short' });
+}
+
+// ═══════════════════════════════════════════════════════
+//  PAGE NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showPage(page) {
+  document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const btns = document.querySelectorAll('.nav-link');
+  const labels = ['home','local','cyber','scam','about','contact'];
+  btns.forEach((b,i) => { if(labels[i] === page) b.classList.add('active'); });
+  if(page !== 'home') renderCategoryPage(page);
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+function render() {
+  renderBreaking();
+  renderFeatured();
+  renderSidebar();
+  renderCategoryBlock('local', 'localGrid', 'localCount');
+  renderCategoryBlock('cyber', 'cyberGrid', 'cyberCount');
+  renderCategoryBlock('scam', 'scamGrid', 'scamCount');
+  updateTicker();
+}
+
+function renderBreaking() {
+  const latest = [...newsDB].sort((a,b) => b.ts - a.ts)[0];
+  if (!latest) return;
+  document.getElementById('breakingText').textContent = latest.title;
+  document.getElementById('breakingMeta').textContent = `${CAT_META[latest.cat].label}  ·  ${formatDate(latest.ts)}`;
+}
+
+function renderFeatured() {
+  const latest = [...newsDB].sort((a,b) => b.ts - a.ts)[0];
+  if (!latest) return;
+
+  const m = CAT_META[latest.cat];
+  const el = document.getElementById('featuredEmoji');
+
+  // ✅ IMAGE PRIORITY
+  if (latest.image && latest.image.startsWith("http")) {
+    el.innerHTML = `
+      <img src="${latest.image}" 
+           style="width:100%;height:100%;object-fit:cover;"
+           onerror="this.style.display='none'; this.parentElement.innerHTML='${latest.emoji || m.emoji}';">
+    `;
+    el.style.background = "none"; // remove gradient if image exists
+  } else {
+    // fallback to emoji
+    el.textContent = latest.emoji || m.emoji;
+    el.style.background = `linear-gradient(135deg,${m.color}22,${m.color}11)`;
+  }
+
+  document.getElementById('featuredCat').textContent = m.label;
+  document.getElementById('featuredTitle').textContent = latest.title;
+  document.getElementById('featuredExcerpt').textContent =
+    latest.excerpt || latest.body?.substring(0,160) + '…';
+  document.getElementById('featuredTime').textContent = timeAgo(latest.ts);
+
+  document.getElementById('featuredStory').onclick =
+    () => openArticle(newsDB.indexOf(latest));
+}
+
+function renderSidebar() {
+  const items = [...newsDB].sort((a,b) => b.ts - a.ts).slice(0,5);
+  const el = document.getElementById('sidebarLatest');
+  if (!items.length) { el.innerHTML = '<p style="color:var(--ink-light);font-size:13px;padding:10px">No stories yet.</p>'; return; }
+  el.innerHTML = items.map((n,i) => `
+    <div class="sidebar-item" onclick="openArticle(${newsDB.indexOf(n)})">
+      <div class="sidebar-num">${i+1}</div>
+      <div class="sidebar-content">
+        <div class="sidebar-cat">${CAT_META[n.cat].label}</div>
+        <div class="sidebar-title">${n.title}</div>
+        <div class="sidebar-time">${timeAgo(n.ts)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function login() {
+  const email = prompt("Email:");
+  const password = prompt("Password:");
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      showToast("Logged in");
+      document.getElementById('addNewsBtn').style.display = "flex"; // ✅ SHOW BUTTON
+    })
+    .catch(() => showToast("Login failed", true));
+}
+
+function logout() {
+  auth.signOut()
+    .then(() => {
+      showToast("Logged out");
+    })
+    .catch(err => {
+      console.error(err);
+      showToast("Logout failed", true);
+    });
+}
+
+function renderCategoryBlock(cat, gridId, countId) {
+  const items = newsDB.filter(n => n.cat === cat).sort((a,b) => b.ts - a.ts).slice(0,5);
+  document.getElementById(countId).textContent = `${newsDB.filter(n=>n.cat===cat).length} stories`;
+  const grid = document.getElementById(gridId);
+  if (!items.length) {
+    const m = CAT_META[cat];
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">${m.emoji}</div><p>No ${m.label} stories yet</p></div>`;
+    return;
+  }
+  grid.innerHTML = items.map(n => postCardHTML(n)).join('');
+}
+
+function renderCategoryPage(cat) {
+  const gridMap = { local:'localPageGrid', cyber:'cyberPageGrid', scam:'scamPageGrid' };
+  const gridId = gridMap[cat];
+  if (!gridId) return;
+  const items = newsDB.filter(n => n.cat === cat).sort((a,b) => b.ts - a.ts);
+  const grid = document.getElementById(gridId);
+  if (!items.length) {
+    const m = CAT_META[cat];
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">${m.emoji}</div><p>No ${m.label} stories yet. Add some!</p></div>`;
+    return;
+  }
+  grid.innerHTML = items.map(n => postCardHTML(n)).join('');
+}
+
+function postCardHTML(n) {
+  const idx = newsDB.indexOf(n);
+
+  return `
+    <div class="post-card" onclick="openArticle(${idx})">
+      
+      <div class="post-card-img">
+        ${n.image 
+          ? `<img src="${n.image}" style="width:100%;height:100%;object-fit:cover;"
+               onerror="this.style.display='none'; this.parentElement.innerHTML='${n.emoji || '📰'}';">`
+          : (n.emoji || '📰')}
+      </div>
+
+      <div class="post-card-body">
+        <div class="post-card-title">${n.title}</div>
+        <div class="post-card-excerpt">${n.excerpt || ''}</div>
+      </div>
+
+      <div class="post-card-foot">
+        <span>${timeAgo(n.ts)}</span>
+        <span class="read-link">Read →</span>
+      </div>
+
+    </div>
+  `;
+}
+
+function updateTicker() {
+  if (!newsDB.length) return;
+  const titles = [...newsDB].sort((a,b) => b.ts - a.ts).slice(0,6).map(n => n.title);
+  const track = document.getElementById('tickerTrack');
+  const inner = titles.map(t => `<span>${t}</span><span class="dot">◆</span>`).join('');
+  track.innerHTML = inner + inner;
+}
+
+// ═══════════════════════════════════════════════════════
+//  ARTICLE MODAL
+// ═══════════════════════════════════════════════════════
+function openArticle(i) {
+  const n = newsDB[i];
+  const m = CAT_META[n.cat];
+
+  const el = document.getElementById('artEmoji');
+
+  // ✅ IMAGE PRIORITY
+  if (n.image && n.image.startsWith("http")) {
+    el.innerHTML = `
+      <img src="${n.image}" 
+           style="width:100%;height:120px;object-fit:cover;border-radius:10px;"
+           onerror="this.style.display='none'; this.parentElement.innerHTML='${n.emoji || m.emoji}';">
+    `;
+  } else {
+    el.textContent = n.emoji || m.emoji;
+  }
+
+  document.getElementById('artCat').textContent = m.label;
+  document.getElementById('artTitle').textContent = n.title;
+  document.getElementById('artMeta').textContent =
+    `Published ${new Date(n.ts).toLocaleString()} • ${n.author || 'ANN Staff'}`;
+
+  document.getElementById('artBody').textContent =
+    n.body || n.excerpt || '';
+
+  document.getElementById('articleModal').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════════════
+//  ADD NEWS MODAL
+// ═══════════════════════════════════════════════════════
+function openAddModal() { document.getElementById('addModal').classList.add('open'); }
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+
+async function submitNews() {
+  if (!auth.currentUser) {
+    showToast("Login required", true);
+    return;
+  }
+
+  const title = document.getElementById('newsTitle').value.trim();
+  const cat = document.getElementById('newsCategory').value;
+
+  if (!title) {
+    showToast("Enter headline", true);
+    return;
+  }
+
+  try {
+    await db.collection("news").add({
+      title,
+      cat,
+      excerpt: document.getElementById('newsExcerpt').value.trim(),
+      body: document.getElementById('newsBody').value.trim(),
+      emoji: document.getElementById('newsEmoji').value.trim(),
+      image: document.getElementById('newsImage')?.value.trim() || "", // ✅ URL
+      ts: Date.now(),
+      author: auth.currentUser.email
+    });
+
+    showToast("News Published ✅");
+    closeAddModal();
+    loadNews();
+
+  } catch (error) {
+    console.error(error);
+    showToast("Error publishing", true);
+  }
+}
+
+async function loadNews() {
+  try {
+    const snapshot = await db.collection("news").orderBy("ts", "desc").get();
+    newsDB = snapshot.docs.map(doc => doc.data());
+    render();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = isError ? '#c0392b' : '#27ae60';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════════
+//  DATE BAR
+// ═══════════════════════════════════════════════════════
+function setDateBar() {
+  const d = new Date();
+  document.getElementById('dateBar').textContent =
+    d.toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) +
+    ' · Edition No. ' + (Math.floor(Date.now()/86400000) - 19000);
+}
+
+// ═══════════════════════════════════════════════════════
+//  CLOSE MODALS ON OVERLAY CLICK
+// ═══════════════════════════════════════════════════════
+document.getElementById('addModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeAddModal();
+});
+document.getElementById('articleModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('articleModal').classList.remove('open');
+});
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+setDateBar();
+loadNews();   // ✅ Only this
+
+// Add sample data if empty
+if (!newsDB.length) {
+  const samples = [
+    { cat:'local', title:'Hyderabad Metro Expansion: New Corridors to Connect Outer Ring Road', excerpt:'HMRL announces Phase 3 plans covering 76 km across 4 new corridors.', body:'The Hyderabad Metro Rail Limited (HMRL) has unveiled ambitious Phase 3 expansion plans that will extend the metro network by 76 kilometres, connecting key areas including Shamshabad, LB Nagar, and BHEL Miyapur to the city centre.\n\nThe project is expected to benefit an additional 12 lakh commuters daily and is scheduled for completion by 2028. Chief Minister announced a budget allocation of ₹18,000 crore for the expansion.\n\nConstruction on the first corridor is expected to begin by Q2 2025 after environmental clearances are obtained.', emoji:'🚇', ts: Date.now()-3600000 },
+    { cat:'cyber', title:'Hyderabad Cybercrime Cell Busts ₹2.4 Crore Online Trading Fraud Ring', excerpt:'Three arrested after victims lured via WhatsApp groups promising guaranteed returns.', body:'The Hyderabad Cybercrime Police arrested three individuals from Bengaluru in connection with an online trading fraud that siphoned ₹2.4 crore from over 47 victims across Telangana.\n\nThe accused operated through WhatsApp groups where they posed as stock market experts, showing fabricated returns screenshots to lure investors. Victims were directed to fake trading platforms that appeared legitimate.\n\nPolice advise citizens to only use SEBI-registered brokers and to verify any investment platform before transferring funds.', emoji:'🚔', ts: Date.now()-7200000 },
+    { cat:'scam', title:'ALERT: Fake "KYC Update" Calls Targeting SBI Customers — Do Not Share OTP', excerpt:'Fraudsters impersonating bank officials have defrauded 200+ customers this month.', body:'The State Bank of India and Hyderabad Cybercrime Police have issued a joint advisory warning customers about a surge in KYC-update scam calls targeting SBI account holders.\n\nCallers claim to be bank officials and warn that accounts will be frozen unless KYC details are immediately updated over the phone. Victims are then asked to share OTPs, leading to unauthorized transfers.\n\nSBI clarifies that it NEVER asks for OTP, CVV, or PIN over calls or SMS. Customers should hang up immediately and report to 1930 (National Cyber Crime Helpline).', emoji:'🛑', ts: Date.now()-10800000 },
+  ];
+  samples.forEach(s => newsDB.push(s));
+  saveDB();
+  loadNews();
+}
+
+auth.onAuthStateChanged(user => {
+  const addBtn = document.getElementById('addNewsBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  if (user) {
+    addBtn.style.display = "flex";
+    logoutBtn.style.display = "flex";
+  } else {
+    addBtn.style.display = "none";
+    logoutBtn.style.display = "none";
+  }
+});
+
+</script>
+</body>
+</html>
